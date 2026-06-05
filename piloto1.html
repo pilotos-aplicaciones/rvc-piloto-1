@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RVC Piloto 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #CC2929;
+  --accent2: #8B1A1A;
+  --bg: #F5F3EE;
+  --surface: #FFFFFF;
+  --border: #E0DCD4;
+  --text: #2C2C2A;
+  --text2: #6B6963;
+  --text3: #A09D96;
+  --green: #3B6D11;
+  --green-l: #EAF3DE;
+  --amber: #854F0B;
+  --amber-l: #FAEEDA;
+  --red: #A32D2D;
+  --red-l: #FCEBEB;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── HEADER ── */
+.header { background: var(--accent); color: #fff; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 16px; font-weight: 600; }
+.header-sub { font-size: 10px; opacity: .6; }
+.hbtn { background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.hbtn:hover { background: rgba(255,255,255,.25); }
+.hbtn.primary { background: #fff; color: var(--accent); font-weight: 600; }
+.sync-status { font-size: 11px; color: rgba(255,255,255,.7); display: flex; align-items: center; gap: 5px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(150,255,180,.85); }
+
+/* ── LOGIN ── */
+.login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #1a1a1a; }
+.login-card { background: #fff; border-radius: 16px; padding: 40px 32px; width: 320px; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+.login-logo { width: 64px; height: 64px; background: var(--accent); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: #fff; font-weight: 700; }
+.login-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.login-card p { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+.login-btn { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.login-btn:hover { background: var(--accent2); }
+.login-err { color: var(--red); font-size: 12px; margin-top: 10px; }
+.acceso-denegado { color: var(--red); font-size: 13px; background: var(--red-l); border-radius: 8px; padding: 10px; margin-top: 12px; }
+
+/* ── APP ── */
+.app { display: none; }
+
+/* ── ACTION BAR ── */
+.action-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 5px 20px; display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 12px; color: var(--text3); }
+.action-bar.active { background: #2C2C2A; }
+.abtn { display: none; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; height: 24px; }
+.action-bar.active .abtn { display: flex; }
+.abtn-del { background: rgba(163,50,38,.5); color: #fff; }
+.abtn-clear { background: rgba(163,50,38,.5); color: #fff; }
+.ab-hint { flex: 1; }
+.action-bar.active .ab-hint { display: none; }
+
+/* ── SEARCH ── */
+.search-bar { padding: 5px 20px 4px; background: var(--bg); position: relative; }
+.search-icon { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none; }
+.search { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px 5px 30px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; color: var(--text); }
+
+/* ── MAIN LAYOUT ── */
+.main { display: flex; height: calc(100vh - 94px); overflow: hidden; }
+.sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; padding: 12px 0; }
+.content { flex: 1; overflow-y: auto; }
+
+/* ── SIDEBAR FILTROS ── */
+.fblock { border-bottom: 1px solid var(--border); }
+.fblock-title { padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.fblock-body { padding: 4px 0 8px; }
+.fopt { padding: 5px 14px; font-size: 12px; color: var(--text2); cursor: pointer; display: flex; justify-content: space-between; }
+.fopt:hover { background: var(--bg); }
+.fopt.active { color: var(--accent); font-weight: 600; background: #FFF0F0; }
+.fcnt { font-size: 11px; color: var(--text3); }
+.clear-filters-btn { width: calc(100% - 28px); margin: 10px 14px 4px; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px; font-size: 11px; color: var(--text3); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.clear-filters-btn:hover { background: var(--red-l); color: var(--red); border-color: var(--red); }
+
+/* ── TABLA TAREAS ── */
+.col-hdr { display: grid; grid-template-columns: 28px 1fr 160px 110px 100px; padding: 6px 20px; background: #EAE6DF; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; position: sticky; top: 0; z-index: 5; }
+.trow { display: grid; grid-template-columns: 28px 1fr 160px 110px 100px; padding: 10px 20px; border-bottom: 1px solid var(--border); align-items: center; cursor: pointer; transition: background .1s; position: relative; }
+.trow:hover { background: var(--surface); }
+.trow.selected { background: #FFF8F8; }
+.trow::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; }
+.sel-chk { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sel-chk.on { background: var(--accent); border-color: var(--accent); }
+.sel-chk.on::after { content: '✓'; color: #fff; font-size: 10px; }
+.ttitle { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+.tuser { font-size: 12px; color: var(--text2); }
+.tdate { font-size: 12px; color: var(--text2); font-family: monospace; }
+.tdate.vencida { color: var(--red); font-weight: 600; }
+.tdate.hoy { color: var(--amber); font-weight: 600; }
+.tstatus { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.s-pend { background: #EEECEA; color: #6B6963; }
+.s-prog { background: #E8F0FB; color: #1A5CB0; }
+.s-done { background: var(--green-l); color: var(--green); }
+.trow.done .ttitle { text-decoration: line-through; color: var(--text3); }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-state p { margin-top: 8px; font-size: 13px; }
+
+/* ── FAB MOBILE ── */
+.fab { display: none; position: fixed; bottom: 24px; right: 20px; width: 52px; height: 52px; background: var(--accent); color: #fff; border: none; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 16px rgba(204,41,41,.4); z-index: 50; }
+
+/* ── MOBILE ── */
+@media(max-width: 768px) {
+  .sidebar { display: none; }
+  .col-hdr { display: none; }
+  .trow { grid-template-columns: 12px 13px 1fr; gap: 2px; padding: 7px 8px 7px 6px; align-items: start; }
+  .trow .tuser, .trow .tdate, .trow .tstatus { display: none; }
+  .trow-mob-meta { font-size: 9px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .desk-only { display: none !important; }
+  .fab { display: flex; align-items: center; justify-content: center; }
+  .action-bar { padding: 5px 14px; }
+  .search-bar { padding: 4px 14px 3px; }
+  .search-icon { left: 24px; }
+  .main { height: calc(100vh - 88px); }
+}
+@media(min-width: 769px) {
+  .mob-only { display: none !important; }
+  .trow-mob-meta { display: none; }
+}
+
+/* ── MODAL ── */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border-radius: 16px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+.modal-inner { padding: 20px; }
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+.fg { margin-bottom: 10px; }
+.fl { display: block; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.fi, .fsel { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); outline: none; min-height: 38px; -webkit-appearance: none; }
+.fi:focus, .fsel:focus { border-color: var(--accent); background: var(--surface); }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.modal-btns { display: flex; gap: 8px; margin-top: 14px; }
+.mbtn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
+.mbtn-cancel { background: var(--bg); color: var(--text2); }
+.mbtn-save { background: var(--accent); color: #fff; }
+.mbtn-save:hover { background: var(--accent2); }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #2C2C2A; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* ── REALTIME BADGE ── */
+.rt-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(59,109,17,.15); color: var(--green); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+.rt-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">R</div>
+    <h2>RVC Piloto 1</h2>
+    <p>Captura de tareas en tiempo real</p>
+    <button class="login-btn" id="login-btn" onclick="signIn()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Iniciar sesión con Google
+    </button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="header">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <h1>RVC Piloto 1</h1>
+        <span class="rt-badge"><span class="rt-dot"></span>En vivo</span>
+      </div>
+      <div class="header-sub" id="hdr-date"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-status" id="sync-status"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">Conectando...</span></span>
+      <button class="hbtn primary desk-only" onclick="openModal()">+ Nueva tarea</button>
+      <button class="hbtn desk-only" onclick="signOut()" style="font-size:11px">Salir</button>
+    </div>
+  </div>
+
+  <div class="action-bar" id="action-bar">
+    <span class="ab-hint">Selecciona tareas para ver acciones</span>
+    <button class="abtn abtn-del" onclick="eliminarSeleccionadas()">🗑 Eliminar</button>
+    <button class="abtn abtn-clear" onclick="clearSelection()">✕ Desmarcar</button>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input class="search" id="search" placeholder="Buscar tarea..." autocomplete="off" oninput="render()">
+  </div>
+
+  <div class="main">
+    <div class="sidebar desk-only">
+      <div class="fblock">
+        <div class="fblock-title" onclick="toggleFblock(this)">Estado <span>▾</span></div>
+        <div class="fblock-body">
+          <div class="fopt active" onclick="sbFilter('estado','',this)"><span>Todos</span><span class="fcnt" id="cnt-all">0</span></div>
+          <div class="fopt" onclick="sbFilter('estado','Pendiente',this)"><span>⏳ Pendiente</span><span class="fcnt" id="cnt-pend">0</span></div>
+          <div class="fopt" onclick="sbFilter('estado','En progreso',this)"><span>▶ En progreso</span><span class="fcnt" id="cnt-prog">0</span></div>
+          <div class="fopt" onclick="sbFilter('estado','Completada',this)"><span>✅ Completada</span><span class="fcnt" id="cnt-done">0</span></div>
+        </div>
+      </div>
+      <div class="fblock">
+        <div class="fblock-title" onclick="toggleFblock(this)">Usuario <span>▾</span></div>
+        <div class="fblock-body" id="user-filters"></div>
+      </div>
+      <button class="clear-filters-btn" onclick="clearFilters()">✕ Limpiar filtros</button>
+    </div>
+
+    <div class="content">
+      <div class="col-hdr desk-only">
+        <span></span>
+        <span>Título</span>
+        <span>Creado por</span>
+        <span>Fecha</span>
+        <span>Estado</span>
+      </div>
+      <div id="task-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB MOBILE -->
+<button class="fab mob-only" onclick="openModal()">+</button>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-title" id="modal-title">Nueva tarea</div>
+      <div class="fg">
+        <label class="fl">Título</label>
+        <input class="fi" id="f-titulo" placeholder="Nombre de la tarea..." autocomplete="off">
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label class="fl">Fecha</label>
+          <input class="fi" id="f-fecha" type="date">
+        </div>
+        <div class="fg">
+          <label class="fl">Estado</label>
+          <select class="fsel" id="f-estado">
+            <option value="Pendiente">⏳ Pendiente</option>
+            <option value="En progreso">▶ En progreso</option>
+            <option value="Completada">✅ Completada</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="mbtn mbtn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="mbtn mbtn-save" onclick="saveTask()">Guardar tarea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCmUlkihNfxV8CyHOZ-38gcEx27jqU0z04",
+  authDomain: "rvc-pilotos-app.firebaseapp.com",
+  projectId: "rvc-pilotos-app",
+  storageBucket: "rvc-pilotos-app.firebasestorage.app",
+  messagingSenderId: "304566913753",
+  appId: "1:304566913753:web:f1936de8ca85188338ccc8"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+const provider = new GoogleAuthProvider();
+
+// ── USUARIOS AUTORIZADOS ──────────────────────────────────────
+// Solo estos emails pueden acceder a la app
+const USUARIOS_AUTORIZADOS = [
+  'rodortino@gmail.com',
+  'rodolfo.vassallo@gmail.com'
+  // Agrega más emails aquí según necesites
+];
+
+// ── ESTADO ───────────────────────────────────────────────────
+let currentUser = null;
+let tasks = [];
+let unsubscribe = null;
+let selected = new Set();
+let filters = { estado: '' };
+let editId = null;
+
+// ── FECHA HEADER ─────────────────────────────────────────────
+const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function setDate(){
+  const d = new Date();
+  document.getElementById('hdr-date').textContent = `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ── SYNC STATUS ───────────────────────────────────────────────
+function setSyncStatus(type, text){
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  txt.textContent = text;
+  dot.style.background = type==='ok'?'rgba(150,255,180,.85)':type==='error'?'rgba(255,150,150,.95)':'rgba(255,200,80,.9)';
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+window.signIn = async function(){
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  err.textContent = '';
+  btn.textContent = 'Conectando...';
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    console.error('login error:', e);
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Iniciar sesión con Google';
+    if(e.code==='auth/popup-blocked') err.textContent = '⚠ Tu navegador bloqueó la ventana. Permite popups e intenta de nuevo.';
+    else if(e.code==='auth/popup-closed-by-user') err.textContent = 'Cancelaste el inicio de sesión.';
+    else err.textContent = 'Error: ' + (e.message||'desconocido');
+  }
+};
+
+window.signOut = async function(){
+  if(!confirm('¿Cerrar sesión?')) return;
+  if(unsubscribe) unsubscribe();
+  await fbSignOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    const email = (user.email||'').toLowerCase();
+    if(!USUARIOS_AUTORIZADOS.includes(email)){
+      fbSignOut(auth);
+      document.getElementById('login-err').innerHTML = `<div class="acceso-denegado">⛔ Tu cuenta <strong>${email}</strong> no tiene acceso a esta app.</div>`;
+      document.getElementById('login-btn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Iniciar sesión con Google';
+      return;
+    }
+    currentUser = user;
+    initApp();
+  } else {
+    currentUser = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    if(unsubscribe){ unsubscribe(); unsubscribe = null; }
+  }
+});
+
+// ── INIT APP ──────────────────────────────────────────────────
+function initApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  setDate();
+  setSyncStatus('syncing','Conectando...');
+  startRealtimeListener();
+}
+
+// ── LISTENER EN TIEMPO REAL (el corazón del piloto) ───────────
+function startRealtimeListener(){
+  const q = query(collection(db,'piloto1_tareas'), orderBy('creadoEn','desc'));
+  unsubscribe = onSnapshot(q,
+    snapshot => {
+      tasks = snapshot.docs.map(d=>({id:d.id,...d.data()}));
+      setSyncStatus('ok','En vivo');
+      render();
+    },
+    err => {
+      console.error(err);
+      setSyncStatus('error','Error de conexión');
+    }
+  );
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(){
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  let filtered = tasks.filter(t=>{
+    if(filters.estado && t.estado!==filters.estado) return false;
+    if(q && !t.titulo?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const isMob = window.innerWidth <= 768;
+  const list = document.getElementById('task-list');
+
+  if(filtered.length===0){
+    list.innerHTML = `<div class="empty-state"><div style="font-size:32px">📋</div><p>No hay tareas. Crea la primera.</p></div>`;
+  } else {
+    list.innerHTML = filtered.map(t=>{
+      const sel = selected.has(t.id);
+      const done = t.estado==='Completada';
+      const fecha = t.fecha ? fmtFecha(t.fecha) : '—';
+      const colorBarra = t.estado==='Completada'?'#639922':t.estado==='En progreso'?'#185FA5':'#aaa';
+      const statusClass = t.estado==='Completada'?'s-done':t.estado==='En progreso'?'s-prog':'s-pend';
+
+      if(isMob){
+        const meta = [t.creadoPor?.split('@')[0], t.fecha?fmtFecha(t.fecha):''].filter(Boolean).join(' · ');
+        return `<div class="trow ${done?'done':''} ${sel?'selected':''}" data-id="${t.id}" onclick="toggleRow(this,event)" style="border-left:3px solid ${colorBarra}">
+          <div class="sel-chk ${sel?'on':''}" onclick="event.stopPropagation();toggleSel('${t.id}')"></div>
+          <div></div>
+          <div style="min-width:0;padding-left:4px">
+            <div class="ttitle">${esc(t.titulo||'')}</div>
+            ${meta?`<div class="trow-mob-meta">${esc(meta)}</div>`:''}
+          </div>
+        </div>`;
+      }
+
+      return `<div class="trow ${done?'done':''} ${sel?'selected':''}" data-id="${t.id}" onclick="toggleRow(this,event)" style="border-left:3px solid ${colorBarra}">
+        <div class="sel-chk ${sel?'on':''}" onclick="event.stopPropagation();toggleSel('${t.id}')"></div>
+        <div class="ttitle" style="cursor:pointer" ondblclick="openModal('${t.id}')">${esc(t.titulo||'')}</div>
+        <div class="tuser">${esc((t.creadoPor||'').split('@')[0])}</div>
+        <div class="tdate">${fecha}</div>
+        <span class="tstatus ${statusClass}">${t.estado}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Contadores filtro
+  document.getElementById('cnt-all').textContent = tasks.length;
+  document.getElementById('cnt-pend').textContent = tasks.filter(t=>t.estado==='Pendiente').length;
+  document.getElementById('cnt-prog').textContent = tasks.filter(t=>t.estado==='En progreso').length;
+  document.getElementById('cnt-done').textContent = tasks.filter(t=>t.estado==='Completada').length;
+
+  // Filtro por usuario
+  const usuarios = [...new Set(tasks.map(t=>t.creadoPor).filter(Boolean))];
+  document.getElementById('user-filters').innerHTML = usuarios.map(u=>`
+    <div class="fopt" onclick="sbFilter('usuario','${u}',this)"><span>${esc(u.split('@')[0])}</span></div>
+  `).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+window.openModal = function(id){
+  editId = id||null;
+  document.getElementById('modal-title').textContent = id ? 'Editar tarea' : 'Nueva tarea';
+  if(id){
+    const t = tasks.find(x=>x.id===id);
+    if(t){
+      document.getElementById('f-titulo').value = t.titulo||'';
+      document.getElementById('f-fecha').value = t.fecha||'';
+      document.getElementById('f-estado').value = t.estado||'Pendiente';
+    }
+  } else {
+    document.getElementById('f-titulo').value = '';
+    document.getElementById('f-fecha').value = today();
+    document.getElementById('f-estado').value = 'Pendiente';
+  }
+  document.getElementById('modal-bg').classList.add('open');
+  setTimeout(()=>document.getElementById('f-titulo').focus(),200);
+};
+window.closeModal = function(){ document.getElementById('modal-bg').classList.remove('open'); editId=null; };
+
+window.saveTask = async function(){
+  const titulo = document.getElementById('f-titulo').value.trim();
+  if(!titulo){ document.getElementById('f-titulo').focus(); return; }
+  const fecha = document.getElementById('f-fecha').value||null;
+  const estado = document.getElementById('f-estado').value;
+  try {
+    if(editId){
+      await updateDoc(doc(db,'piloto1_tareas',editId),{titulo,fecha,estado});
+      showToast('✓ Tarea actualizada');
+    } else {
+      await addDoc(collection(db,'piloto1_tareas'),{
+        titulo, fecha, estado,
+        creadoPor: currentUser.email,
+        creadoEn: serverTimestamp()
+      });
+      showToast('✓ Tarea creada');
+    }
+    closeModal();
+  } catch(e){
+    showToast('⚠ Error al guardar');
+    console.error(e);
+  }
+};
+
+// ── SELECCIÓN ─────────────────────────────────────────────────
+window.toggleRow = function(r,ev){
+  if(ev && (ev.target.tagName==='BUTTON'||ev.target.closest('button'))) return;
+  const id = r.dataset.id;
+  if(selected.has(id)){ selected.delete(id); } else { selected.add(id); }
+  updateActionBar();
+  render();
+};
+window.toggleSel = function(id){
+  if(selected.has(id)){ selected.delete(id); } else { selected.add(id); }
+  updateActionBar();
+  render();
+};
+window.clearSelection = function(){ selected.clear(); updateActionBar(); render(); };
+function updateActionBar(){
+  const bar = document.getElementById('action-bar');
+  if(selected.size>0){ bar.classList.add('active'); }
+  else { bar.classList.remove('active'); }
+}
+
+window.eliminarSeleccionadas = async function(){
+  if(!selected.size) return;
+  if(!confirm(`¿Eliminar ${selected.size} tarea(s)?`)) return;
+  for(const id of selected){
+    await deleteDoc(doc(db,'piloto1_tareas',id));
+  }
+  selected.clear();
+  updateActionBar();
+  showToast('✓ Eliminadas');
+};
+
+// ── FILTROS ───────────────────────────────────────────────────
+window.sbFilter = function(k,v,el){
+  filters[k]=v;
+  el.closest('.fblock-body').querySelectorAll('.fopt').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  render();
+};
+window.clearFilters = function(){
+  filters={estado:''};
+  document.querySelectorAll('.fopt').forEach(e=>{
+    if(e.closest('.fblock-body')?.children[0]===e) e.classList.add('active');
+    else e.classList.remove('active');
+  });
+  render();
+};
+window.toggleFblock = function(el){
+  const body = el.nextElementSibling;
+  body.style.display = body.style.display==='none'?'':'none';
+};
+
+// ── HELPERS ───────────────────────────────────────────────────
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function fmtFecha(s){
+  if(!s) return '—';
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+</script>
+</body>
+</html>
