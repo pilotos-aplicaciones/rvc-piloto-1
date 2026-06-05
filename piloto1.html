@@ -267,7 +267,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -284,13 +284,9 @@ const db = getFirestore(fbApp);
 const auth = getAuth(fbApp);
 const provider = new GoogleAuthProvider();
 
-// ── USUARIOS AUTORIZADOS ──────────────────────────────────────
-// Solo estos emails pueden acceder a la app
-const USUARIOS_AUTORIZADOS = [
-  'rodortino@gmail.com',
-  'rodolfo.vassallo@gmail.com'
-  // Agrega más emails aquí según necesites
-];
+// ── ID DE ESTA APP EN LA PLATAFORMA ────────────────────────────
+// Este ID debe coincidir con el registrado en la app de administración
+const APP_ID = 'piloto1';
 
 // ── ESTADO ───────────────────────────────────────────────────
 let currentUser = null;
