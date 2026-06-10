@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RVC Piloto 1</title>
+<title>RVC Piloto 1 v1.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -150,6 +150,32 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .rt-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(59,109,17,.15); color: var(--green); font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
 .rt-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── MENÚ HAMBURGUESA ── */
+.hmenu-wrap { position: relative; }
+.hmenu-btn { background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 8px; width: 32px; height: 32px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.hmenu-btn:hover { background: rgba(255,255,255,.28); }
+.hmenu-panel { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; width: 220px; z-index: 300; box-shadow: 0 6px 24px rgba(0,0,0,.12); overflow: hidden; }
+.hmenu-panel.open { display: block; }
+.hmenu-section { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; padding: 10px 14px 4px; }
+.hmenu-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; font-size: 13px; color: var(--text); cursor: pointer; background: none; border: none; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
+.hmenu-item:hover { background: var(--bg); }
+.hmenu-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.hi-green { background: var(--green-l); color: var(--green); }
+.hi-blue { background: #E8F0FB; color: #185FA5; }
+.hi-red { background: var(--red-l); color: var(--red); }
+.hmenu-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.hm-badge { font-size: 10px; background: var(--green-l); color: var(--green); border-radius: 4px; padding: 1px 6px; font-weight: 600; margin-left: auto; }
+
+/* ── MODAL IMPORTAR ── */
+.import-drop { border: 2px dashed var(--border); border-radius: 8px; padding: 24px; text-align: center; color: var(--text2); font-size: 13px; cursor: pointer; transition: border-color .2s, background .2s; }
+.import-drop:hover, .import-drop.over { border-color: var(--accent); background: #FFF8F8; }
+.import-preview { margin-top: 12px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+.import-preview table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.import-preview th { background: #EAE6DF; padding: 5px 10px; text-align: left; font-weight: 600; color: var(--text2); font-size: 11px; position: sticky; top: 0; }
+.import-preview td { padding: 5px 10px; border-top: 1px solid var(--border); color: var(--text); }
+.import-info { font-size: 12px; color: var(--text2); margin-top: 8px; }
+.import-info strong { color: var(--text); }
 </style>
 </head>
 <body>
@@ -181,7 +207,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div style="display:flex;align-items:center;gap:8px">
       <span class="sync-status" id="sync-status"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">Conectando...</span></span>
       <button class="hbtn primary desk-only" onclick="openModal()">+ Nueva tarea</button>
-      <button class="hbtn desk-only" onclick="signOut()" style="font-size:11px">Salir</button>
+      <div class="hmenu-wrap">
+        <button class="hmenu-btn" onclick="toggleHMenu(event)" aria-label="Menú">☰</button>
+        <div class="hmenu-panel" id="hmenu-panel">
+          <div class="hmenu-section">Datos</div>
+          <button class="hmenu-item" onclick="exportarExcel()">
+            <span class="hmenu-icon hi-green">↓</span>
+            <span>Exportar a Excel</span>
+            <span class="hm-badge">Nuevo</span>
+          </button>
+          <button class="hmenu-item" onclick="abrirImportar()">
+            <span class="hmenu-icon hi-blue">↑</span>
+            <span>Importar desde Excel</span>
+            <span class="hm-badge">Nuevo</span>
+          </button>
+          <div class="hmenu-divider"></div>
+          <div class="hmenu-section">Sesión</div>
+          <button class="hmenu-item" onclick="signOut()">
+            <span class="hmenu-icon hi-red">→</span>
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -256,6 +303,32 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="modal-btns">
         <button class="mbtn mbtn-cancel" onclick="closeModal()">Cancelar</button>
         <button class="mbtn mbtn-save" onclick="saveTask()">Guardar tarea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAR -->
+<div class="modal-bg" id="import-modal-bg" onclick="if(event.target===this)cerrarImportar()">
+  <div class="modal">
+    <div class="modal-inner">
+      <div class="modal-title">Importar desde Excel</div>
+      <div class="import-drop" id="import-drop" onclick="document.getElementById('import-file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="handleDrop(event)">
+        <div style="font-size:28px;margin-bottom:8px">📂</div>
+        <div>Haz clic o arrastra un archivo <strong>.xlsx</strong></div>
+        <div style="font-size:11px;margin-top:4px;color:#A09D96">Columnas esperadas: Título, Estado, Fecha</div>
+      </div>
+      <input type="file" id="import-file-input" accept=".xlsx,.xls" style="display:none" onchange="procesarArchivoImport(this.files[0])">
+      <div id="import-preview-wrap" style="display:none">
+        <div class="import-info" id="import-info"></div>
+        <div class="import-preview" id="import-preview"></div>
+      </div>
+      <div class="modal-btns">
+        <button class="mbtn mbtn-cancel" onclick="cerrarImportar()">Cancelar</button>
+        <button class="mbtn mbtn-save" id="import-confirm-btn" style="display:none" onclick="confirmarImport()">Importar tareas</button>
       </div>
     </div>
   </div>
@@ -561,6 +634,154 @@ function fmtFecha(s){
   const [y,m,d] = s.split('-');
   return `${d}/${m}/${y}`;
 }
+
+// ── MENÚ HAMBURGUESA ─────────────────────────────────────────
+window.toggleHMenu = function(e){
+  e.stopPropagation();
+  document.getElementById('hmenu-panel').classList.toggle('open');
+};
+document.addEventListener('click', function(){
+  document.getElementById('hmenu-panel')?.classList.remove('open');
+});
+
+// ── EXPORTAR A EXCEL ─────────────────────────────────────────
+window.exportarExcel = function(){
+  document.getElementById('hmenu-panel').classList.remove('open');
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  const filtered = tasks.filter(t=>{
+    if(filters.estado && t.estado!==filters.estado) return false;
+    if(q && !t.titulo?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if(!filtered.length){ showToast('⚠ No hay tareas para exportar'); return; }
+
+  const rows = filtered.map(t=>({
+    'Título': t.titulo||'',
+    'Estado': t.estado||'',
+    'Fecha': t.fecha||'',
+    'Creado por': t.creadoPor||'',
+  }));
+
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  script.onload = function(){
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:40},{wch:15},{wch:12},{wch:30}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Tareas');
+    const fecha = new Date().toISOString().split('T')[0];
+    const label = filters.estado ? `_${filters.estado.replace(/ /g,'_')}` : '';
+    XLSX.writeFile(wb, `tareas_piloto1${label}_${fecha}.xlsx`);
+    showToast(`✓ ${filtered.length} tarea(s) exportadas`);
+  };
+  if(window.XLSX){
+    script.onload();
+  } else {
+    document.head.appendChild(script);
+  }
+};
+
+// ── IMPORTAR DESDE EXCEL ─────────────────────────────────────
+let importRows = [];
+
+window.abrirImportar = function(){
+  document.getElementById('hmenu-panel').classList.remove('open');
+  importRows = [];
+  document.getElementById('import-file-input').value = '';
+  document.getElementById('import-preview-wrap').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+  document.getElementById('import-drop').innerHTML = `
+    <div style="font-size:28px;margin-bottom:8px">📂</div>
+    <div>Haz clic o arrastra un archivo <strong>.xlsx</strong></div>
+    <div style="font-size:11px;margin-top:4px;color:#A09D96">Columnas esperadas: Título, Estado, Fecha</div>`;
+  document.getElementById('import-modal-bg').classList.add('open');
+};
+
+window.cerrarImportar = function(){
+  document.getElementById('import-modal-bg').classList.remove('open');
+};
+
+window.handleDrop = function(e){
+  e.preventDefault();
+  document.getElementById('import-drop').classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if(file) procesarArchivoImport(file);
+};
+
+window.procesarArchivoImport = function(file){
+  if(!file) return;
+  const loadXLSX = (cb) => {
+    if(window.XLSX){ cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = cb;
+    document.head.appendChild(s);
+  };
+  loadXLSX(()=>{
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, {defval:''});
+        if(!data.length){ showToast('⚠ Archivo vacío o sin datos'); return; }
+
+        importRows = data.map(row=>{
+          const titulo = row['Título']||row['Titulo']||row['titulo']||row['TÍTULO']||'';
+          const estado = row['Estado']||row['estado']||'Pendiente';
+          const fecha = row['Fecha']||row['fecha']||'';
+          return {titulo: String(titulo).trim(), estado: String(estado).trim(), fecha: String(fecha).trim()};
+        }).filter(r=>r.titulo);
+
+        if(!importRows.length){ showToast('⚠ No se encontró columna "Título"'); return; }
+
+        const preview = document.getElementById('import-preview');
+        preview.innerHTML = `<table>
+          <thead><tr><th>Título</th><th>Estado</th><th>Fecha</th></tr></thead>
+          <tbody>${importRows.slice(0,8).map(r=>`<tr>
+            <td>${esc(r.titulo)}</td>
+            <td>${esc(r.estado)}</td>
+            <td>${esc(r.fecha)}</td>
+          </tr>`).join('')}
+          ${importRows.length>8?`<tr><td colspan="3" style="color:#A09D96;text-align:center;padding:6px">... y ${importRows.length-8} más</td></tr>`:''}
+          </tbody></table>`;
+
+        document.getElementById('import-info').innerHTML = `<strong>${importRows.length} tarea(s)</strong> listas para importar desde <em>${esc(file.name)}</em>`;
+        document.getElementById('import-preview-wrap').style.display = 'block';
+        document.getElementById('import-confirm-btn').style.display = 'block';
+      } catch(err){
+        showToast('⚠ Error al leer el archivo');
+        console.error(err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+};
+
+window.confirmarImport = async function(){
+  if(!importRows.length) return;
+  const btn = document.getElementById('import-confirm-btn');
+  btn.textContent = 'Importando...';
+  btn.disabled = true;
+  let ok = 0, err = 0;
+  for(const r of importRows){
+    try {
+      const estadosValidos = ['Pendiente','En progreso','Completada'];
+      const estado = estadosValidos.includes(r.estado) ? r.estado : 'Pendiente';
+      const fecha = /^\d{4}-\d{2}-\d{2}$/.test(r.fecha) ? r.fecha : null;
+      await addDoc(collection(db,'piloto1_tareas'),{
+        titulo: r.titulo,
+        estado,
+        fecha,
+        creadoPor: currentUser.email,
+        creadoEn: serverTimestamp()
+      });
+      ok++;
+    } catch(e){ err++; console.error(e); }
+  }
+  cerrarImportar();
+  showToast(err ? `✓ ${ok} importadas, ${err} errores` : `✓ ${ok} tarea(s) importadas`);
+};
 </script>
 </body>
 </html>
